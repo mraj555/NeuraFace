@@ -1,23 +1,46 @@
+import 'dart:io';
+
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 
-class HomeController extends GetxController {
-  //TODO: Implement HomeController
+class HomeController extends GetxController with GetSingleTickerProviderStateMixin {
+  File? image;
 
-  final count = 0.obs;
+  ImagePicker picker = ImagePicker();
+
+  List<Tab> tabs = [Tab(text: "Register"), Tab(text: "Recognize")];
+  late TabController controller;
+
+  TextEditingController name = TextEditingController();
+
+  RxInt index = 0.obs;
+
   @override
   void onInit() {
     super.onInit();
+    controller = TabController(length: tabs.length, vsync: this);
+
+    controller.addListener(() {
+      index.value = controller.index;
+      update();
+    });
   }
 
-  @override
-  void onReady() {
-    super.onReady();
+  ///Functionality For Pick or Capture Image
+  onPickOrCaptureImage(ImageSource source, int index) async {
+    XFile? file = await picker.pickImage(source: source);
+
+    if (file != null) {
+      image = File(file.path);
+    }
+    update();
   }
 
-  @override
-  void onClose() {
-    super.onClose();
+  ///Functionality for Remove or Clear Image
+  onRemoveImage({index = 0}) {
+    if (image != null) image = null;
+    if (index == 0) name.clear();
+    update();
   }
-
-  void increment() => count.value++;
 }
